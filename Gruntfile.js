@@ -1,24 +1,41 @@
 module.exports = function(grunt) {
-
     grunt.initConfig({
         uglify: {
             my_target: {
               files: {
-                'src/js/jquery.amaran.min.js': 
-                ['src/js/jquery.amaran.js'] 
+                'assets/js/main.min.js': 
+                ['assets/js/main.js'] 
               }
             }
         },
         cssmin: {
 		  combine: {
 		    files: {
-		      'src/css/jquery.amaran.min.css': ['src/css/jquery.amaran.css'],
-              'src/css/theme/all-themes.css': ['src/css/theme/default.css','src/css/theme/inset-white.css','src/css/theme/metro.css','src/css/theme/user.css','src/css/theme/white.css']
+		      'assets/css/main.min.css': ['assets/css/main.css']
 		    }
 		  }
-		}
+		},
+    less: {
+      development: {
+        options: {
+          paths: ["assets/css"]
+        },
+        files: {
+          "assets/css/main.css": "assets/css/main.less"
+        }
+      }
+    },
+    watch: {
+        src: {
+          files: ['assets/css/main.less', 'assets/js/main.js'], 
+          tasks: ['build'],
+        },
+      }
     });
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
-    grunt.registerTask('build', ['uglify','cssmin']);
+    grunt.loadNpmTasks('grunt-contrib-less');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.registerTask('build', ['uglify','cssmin','less']);
+    
 }
