@@ -21,3 +21,4 @@ amaranjs/node_modules/*
 /.idea/
 .sass-cache
 /.sass-cache
+/examples

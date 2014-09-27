@@ -38,14 +38,16 @@
     Plugin:: =
         
        init: ->
-            
             wrapper= null
+            wrapperInner = null
+            elClass = @config.position.split(" ")
             # Lets create wrapper for amaranjs notification elements.
             # If wrapper not created yet lets create wrapper.
             unless $(@config.wrapper).length
                 # Remove dot from wrapper and append position value.
                 # Append wrapper to body.
                 wrapper = $("<div>",class: @config.wrapper.substr(1, @config.wrapper.length) + " " + @config.position).appendTo("body")
+                innerWrapper = $("<div>",class: "amaran-wrapper-inner").appendTo(wrapper)
             else
                 # We have wrapper.
                 # If our wrapper dont have same positon value
@@ -53,13 +55,15 @@
                 unless $(@config.wrapper).hasClass(@config.position)
                     # Append new wrapper to body.
                     wrapper = $("<div>",class: @config.wrapper.substr(1, @config.wrapper.length) + " " + @config.position).appendTo("body")
+                    innerWrapper = $("<div>",class: "amaran-wrapper-inner").appendTo(wrapper)
+                    console.log innerWrapper
                 else
                     # If we have wrapper with same class just set wrapper value to 
                     # current wrapper.
-                    elClass = @config.position.split(" ")
                     wrapper = $(@config.wrapper + "." + elClass[0] + "." + elClass[1])
+                    innerWrapper = wrapper.find ".amaran-wrapper-inner"
             #message = (if (typeof (@config.content) is "object") then (if (@config.themeTemplate?) then @config.themeTemplate(@config.content) else themes[@config.theme.split(" ")[0] + "Theme"](@config.content)) else @config.content)
-            
+
             # Is content is an object ?
             if typeof (@config.content) is "object"
                 # Is custom theme setted ?
@@ -80,8 +84,8 @@
             # Clear if clearAll option true
             $(".amaran").remove()  if @config.clearAll
             # Finally lets create element and append to wrapper.
-            element = $("<div>", amaranObject).appendTo(wrapper)
-           
+            #console.log innerWrapper
+            element = $("<div>", amaranObject).appendTo(innerWrapper)
             @animation @config.inEffect, element, "show"
             # OnClick callback
             if @config.onClick
@@ -91,8 +95,16 @@
                     return
             # If its not sticky hide after delay
             @hideDiv element  if @config.sticky isnt true
+            @centerCalculate wrapper, innerWrapper  if elClass[0] is "center"
             return
-            
+        centerCalculate: (wrapper,innerWrapper) ->
+            totalAmarans = innerWrapper.find(".amaran").length
+            totalAmaransHeight = innerWrapper.height()
+            topAmaranMargin = (wrapper.height()-totalAmaransHeight)/2
+            innerWrapper.find(".amaran:first-child").animate
+                "margin-top": topAmaranMargin
+            , 200
+            return
         # Lets decide which effect we will use    
         animation: (effect, element, work) ->
             return @fade(element, work)  if effect is "fadeIn" or effect is "fadeOut"
@@ -102,6 +114,7 @@
         fade: (element,work) ->
             # Fade is easy one
             # if work is show just fadein element
+            bu = @
             if work is "show"
                 if @.config.cssanimationIn
                     element.addClass('animated '+@.config.cssanimationIn).show()
@@ -119,7 +132,8 @@
                         element.animate
                             height: 0
                         , ->
-                            element.remove()
+                            #element.remove()
+                            bu.removeIt(element)
                             return
                         return
                     return
@@ -137,12 +151,19 @@
                         element.animate
                             height: 0
                         , ->
-                            element.remove()
+                            bu.removeIt(element)
                             return
                         return
                     return
 
                 return
+        removeIt: (element) ->
+            element.remove()
+            wrapper = $(@config.wrapper+"."+@config.position.split(" ")[0]+"."+@config.position.split(" ")[1])
+            innerWrapper = wrapper.find ".amaran-wrapper-inner"
+            @centerCalculate wrapper, innerWrapper  if @config.position.split(" ")[0] is "center"
+            #console.log "Element removed."
+            return
         # why this method ?
         # i need elements width for calculation before show
         # i did this function before border-box become popular
@@ -260,14 +281,16 @@
                 ).animate
                     height: 0
                 , ->
-                    element.remove()
+                    #element.remove()
+                    bu.removeIt(element)
                     bu.config.afterEnd()
-        
         # Lets remove/close element
         close: ->
             # bu means this in my language
             bu = this
             # if closeOnClick and closeButton not setted
+            # lets set wrapper
+
             if not @config.closeOnClick and @config.closeButton
                 bu.animation bu.config.outEffect , $(this).parent("div.amaran"), "hide"
                 return
@@ -276,6 +299,7 @@
                 $(".amaran").on "click", ->
                     bu.animation bu.config.outEffect, $(this), "hide"
                     return
+
             return
         hideDiv: (element) ->
             bu = this
