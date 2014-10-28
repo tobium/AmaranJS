@@ -102,6 +102,7 @@
         fade: (element,work) ->
             # Fade is easy one
             # if work is show just fadein element
+            bu = this
             if work is "show"
                 if @.config.cssanimationIn
                     element.addClass('animated '+@.config.cssanimationIn).show()
@@ -120,6 +121,8 @@
                             height: 0
                         , ->
                             element.remove()
+                            $.amaran.close()
+                            bu.config.afterEnd()
                             return
                         return
                     return
@@ -138,6 +141,8 @@
                             height: 0
                         , ->
                             element.remove()
+                            $.amaran.close()
+                            bu.config.afterEnd()
                             return
                         return
                     return
